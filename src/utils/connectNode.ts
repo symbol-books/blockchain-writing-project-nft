@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const connectNode = async (nodeList: string[]): Promise<string | null> => {
+export const connectNode = async (nodeList: string[]): Promise<string> => {
   const node = nodeList[Math.floor(Math.random() * nodeList.length)];
   try {
     const response = await axios.get(node + '/node/health', { timeout: 1000 });
@@ -9,9 +9,9 @@ export const connectNode = async (nodeList: string[]): Promise<string | null> =>
       console.log(node);
       return node;
     } else {
-      return null;
+      return '';
     }
   } catch (e) {
-    return null;
+    return '';
   }
 };

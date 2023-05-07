@@ -15,7 +15,7 @@ export const sendMessage = async (
   adminAddress: string
 ): Promise<string> => {
   const NODE = await connectNode(nodeList);
-  if (NODE === null) return '';
+  if (NODE === '') return '';
   const repo = new RepositoryFactoryHttp(NODE, {
     websocketUrl: NODE.replace('http', 'ws') + '/ws',
     websocketInjected: WebSocket

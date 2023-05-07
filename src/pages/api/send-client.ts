@@ -17,7 +17,7 @@ import { nodeList } from '@/consts/nodeList';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     const NODE = await connectNode(nodeList);
-    if (NODE === null) return '';
+    if (NODE === '') return '';
     const repo = new RepositoryFactoryHttp(NODE, {
       websocketUrl: NODE.replace('http', 'ws') + '/ws',
       websocketInjected: WebSocket
