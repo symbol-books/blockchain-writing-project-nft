@@ -18,7 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'POST') {
     const NODE = await connectNode(nodeList);
     if (NODE === null) return '';
-    const repo = new RepositoryFactoryHttp(NODE);
+    const repo = new RepositoryFactoryHttp(NODE, {
+      websocketUrl: NODE.replace('http', 'ws') + '/ws',
+      websocketInjected: WebSocket
+    });
     const txRepo = repo.createTransactionRepository();
     const listener = repo.createListener();
 
@@ -42,11 +45,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await firstValueFrom(txRepo.announce(signedTx));
 
     await listener.open();
-    listener.unconfirmedAdded(clientAddress, signedTx.hash).subscribe((unconfirmedTx) => {
-      console.log(unconfirmedTx);
-      const transactionHash = unconfirmedTx.transactionInfo?.hash;
-      listener.close();
-      return res.status(200).json(transactionHash);
+    const transactionHash:string = await new Promise((resolve) => {
+      listener.unconfirmedAdded(clientAddress, signedTx.hash).subscribe((unconfirmedTx) => {
+        console.log(unconfirmedTx);
+        const transactionHash = unconfirmedTx.transactionInfo?.hash;
+        listener.close();
+        resolve(transactionHash ?? '');
+      });
     });
+    return res.status(200).json(transactionHash);
   }
 }

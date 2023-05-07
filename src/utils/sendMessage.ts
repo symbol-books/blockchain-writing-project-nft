@@ -16,15 +16,16 @@ export const sendMessage = async (
 ): Promise<string> => {
   const NODE = await connectNode(nodeList);
   if (NODE === null) return '';
-  const repo = new RepositoryFactoryHttp(NODE);
+  const repo = new RepositoryFactoryHttp(NODE, {
+    websocketUrl: NODE.replace('http', 'ws') + '/ws',
+    websocketInjected: WebSocket
+  });
   const txRepo = repo.createTransactionRepository();
+  const listener = repo.createListener();
 
   const epochAdjustment = await firstValueFrom(repo.getEpochAdjustment());
   const generationHash = await firstValueFrom(repo.getGenerationHash());
   const networkType = await firstValueFrom(repo.getNetworkType());
-
-  const wsEndpoint = NODE.replace('http', 'ws') + '/ws';
-  const ws = new WebSocket(wsEndpoint);
 
   const client = Account.createFromPrivateKey(clientPrivateKey, networkType);
 
@@ -38,29 +39,15 @@ export const sendMessage = async (
 
   const signedTx = client.sign(tx, generationHash);
   await firstValueFrom(txRepo.announce(signedTx));
-  const transactionStatusUrl = NODE + '/transactionStatus/' + signedTx.hash;
 
-  return new Promise((resolve, reject) => {
-    ws.onopen = function (e) {};
-    ws.onmessage = function (event) {
-      const response = JSON.parse(event.data);
-      if ('uid' in response) {
-        const uid = response.uid;
-        const body = '{"uid":"' + uid + '","subscribe":"block"}';
-        const transaction =
-          '{"uid":"' + uid + '","subscribe":"confirmedAdded/' + client.address.plain() + '"}';
-        ws.send(body);
-        ws.send(transaction);
-      }
-      if (response.topic == 'confirmedAdded/' + client.address.plain()) {
-        const transactionHash = response.data.meta.hash;
-        ws.close();
-        resolve(transactionHash);
-      }
-    };
-    setTimeout(() => {
-      ws.close();
-      reject(new Error(transactionStatusUrl));
-    }, 60000); //60秒でタイムアウト
+  await listener.open();
+  const transactionHash:string = await new Promise((resolve) => {
+    listener.confirmed(client.address, signedTx.hash).subscribe((confirmedTx) => {
+      console.log(confirmedTx);
+      const transactionHash = confirmedTx.transactionInfo?.hash;
+      listener.close();
+      resolve(transactionHash ?? '');
+    });
   });
+  return transactionHash;
 };
