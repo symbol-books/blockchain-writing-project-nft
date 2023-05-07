@@ -34,7 +34,7 @@ function Page1(): JSX.Element {
     setOpenSnackbar(true);
     setProgress(false);
   };
-  
+
   return (
     <>
       <Header setOpenLeftDrawer={setOpenLeftDrawer} />
@@ -50,7 +50,7 @@ function Page1(): JSX.Element {
         openDialog={openDialogClientAddress}
         setOpenDialog={setOpenDialogClientAddress}
         handleAgreeClick={() => {
-          handleAgreeClickClientAddress()
+          handleAgreeClickClientAddress();
           setOpenDialogClientAddress(false);
         }}
         dialogTitle={dialogTitle}
@@ -62,36 +62,36 @@ function Page1(): JSX.Element {
         </Backdrop>
       ) : (
         <Box
-        sx={{ p: 3 }}
-        display='flex'
-        alignItems='center'
-        justifyContent='center'
-        flexDirection='column'
-      >
-        <Typography component='div' variant='h6' sx={{ mt: 5, mb: 5 }}>
-          クライアント側でのアカウント作成
-        </Typography>
-        <Button
-          color='primary'
-          variant='contained'
-          onClick={() => {
-            setDialogTitle('アカウントの生成');
-            setDialogMessage('アカウントを生成しますか？');
-            setOpenDialogClientAddress(true);
-          }}
+          sx={{ p: 3 }}
+          display='flex'
+          alignItems='center'
+          justifyContent='center'
+          flexDirection='column'
         >
-          アドレスの生成
-        </Button>
-        <Typography component='div' variant='caption' sx={{ mt: 5, mb: 1 }}>
-          {`秘密鍵 : ${clientPrivateKey}`}
-        </Typography>
-        <Typography component='div' variant='caption' sx={{ mt: 1, mb: 1 }}>
-          {`公開鍵 : ${clientPublicKey}`}
-        </Typography>
-        <Typography component='div' variant='caption' sx={{ mt: 1, mb: 1 }}>
-          {`アドレス : ${clientAddress}`}
-        </Typography>
-      </Box>
+          <Typography component='div' variant='h6' sx={{ mt: 5, mb: 5 }}>
+            クライアント側でのアカウント作成
+          </Typography>
+          <Button
+            color='primary'
+            variant='contained'
+            onClick={() => {
+              setDialogTitle('アカウントの生成');
+              setDialogMessage('アカウントを生成しますか？');
+              setOpenDialogClientAddress(true);
+            }}
+          >
+            アドレスの生成
+          </Button>
+          <Typography component='div' variant='caption' sx={{ mt: 5, mb: 1 }}>
+            {`秘密鍵 : ${clientPrivateKey}`}
+          </Typography>
+          <Typography component='div' variant='caption' sx={{ mt: 1, mb: 1 }}>
+            {`公開鍵 : ${clientPublicKey}`}
+          </Typography>
+          <Typography component='div' variant='caption' sx={{ mt: 1, mb: 1 }}>
+            {`アドレス : ${clientAddress}`}
+          </Typography>
+        </Box>
       )}
     </>
   );

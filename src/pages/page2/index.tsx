@@ -22,11 +22,10 @@ function Page2(): JSX.Element {
   const [adminAddress, setAdminAddress] = useRecoilState(AdminAddress);
   const [openDialogGetAddress, setOpenDialogGetAddress] = useState<boolean>(false); //AlertsDialogの設定(個別)
   const handleAgreeClickGetAddress = () => {
-    //AlertsDialogの設定(個別)
     const fetchData = async () => {
       try {
         setProgress(true);
-        const res = await axios.get('/api/address');
+        const res = await axios.get('/api/fetch-address');
         const address: React.SetStateAction<string> = res.data;
         console.log(address);
         setAdminAddress(address);

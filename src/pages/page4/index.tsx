@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import LeftDrawer from '@/components/LeftDrawer';
 import Header from '@/components/Header';
-import axios from 'axios';
 import AlertsSnackbar from '@/components/AlertsSnackbar';
 import AlertsDialog from '@/components/AlertsDialog';
 import { Box, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
-import { AdminAddress, ClientAddress } from '@/globalState/atoms';
+import { AdminAddress, ClientPrivateKey } from '@/globalState/atoms';
 import { useRecoilValue } from 'recoil';
+import { sendMessage } from '@/utils/sendMessage';
 
 function Page4(): JSX.Element {
   //共通設定
@@ -20,12 +20,11 @@ function Page4(): JSX.Element {
 
   //ページ個別設定
   const [hash, setHash] = useState<string>('');
-  const clientAddress = useRecoilValue(ClientAddress);
+  const clientPrivateKey = useRecoilValue(ClientPrivateKey);
   const adminAddress = useRecoilValue(AdminAddress);
   const [openDialogSendMessage, setOpenDialogSendMessage] = useState<boolean>(false); //AlertsDialogの設定(個別)
-  const handleAgreeClickSendMessage = () => {
-    //AlertsDialogの設定(個別)
-    if (clientAddress === '') {
+  const handleAgreeClickSendMessage = async () => {
+    if (clientPrivateKey === '') {
       //事前チェック
       setSnackbarSeverity('error');
       setSnackbarMessage('クライアントのアカウントを作成して下さい');
@@ -39,21 +38,23 @@ function Page4(): JSX.Element {
       setOpenSnackbar(true);
       return;
     }
-    if (false) {
-      //事前チェック
-      setSnackbarSeverity('error');
-      setSnackbarMessage('クライアント側に手数料分のxymを送金して下さい');
+    try {
+      setProgress(true);
+      const transactionHash = await sendMessage(clientPrivateKey, adminAddress);
+      console.log(transactionHash);
+      setHash(transactionHash);
+      setSnackbarSeverity('success');
+      setSnackbarMessage('承認済みTXを検知しました');
       setOpenSnackbar(true);
-      return;
+    } catch (error) {
+      console.log(error);
+      setSnackbarSeverity('error');
+      setSnackbarMessage('TXに失敗しました。手数料不足などが考えられます');
+      setOpenSnackbar(true);
+    } finally {
+      setProgress(false);
     }
-
-    // const [privatekey, publickey, address] = sendMessage(clientAddress,adminAddress);
-    setHash('');
-    setSnackbarSeverity('success');
-    setSnackbarMessage('メッセージの送信に成功しました');
-    setOpenSnackbar(true);
   };
-
   return (
     <>
       <Header setOpenLeftDrawer={setOpenLeftDrawer} />
@@ -98,7 +99,7 @@ function Page4(): JSX.Element {
             variant='contained'
             onClick={() => {
               setDialogTitle('メッセージ送信');
-              setDialogMessage('クライアントへ管理者へメッセージを送信しますか？');
+              setDialogMessage('クライアントから管理者へメッセージを送信しますか？');
               setOpenDialogSendMessage(true);
             }}
           >

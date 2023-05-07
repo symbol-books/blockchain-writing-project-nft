@@ -23,7 +23,6 @@ function Page3(): JSX.Element {
   const clientAddress = useRecoilValue(ClientAddress);
   const [openDialogSendXym, setOpenDialogSendXym] = useState<boolean>(false); //AlertsDialogの設定(個別)
   const handleAgreeClickSendXym = () => {
-    //AlertsDialogの設定(個別)
     if (clientAddress === '') {
       //事前チェック
       setSnackbarSeverity('error');
@@ -35,7 +34,7 @@ function Page3(): JSX.Element {
       try {
         setProgress(true);
         const res = await axios.post(
-          '/api/send',
+          '/api/send-client',
           {
             address: clientAddress,
           },
@@ -45,9 +44,9 @@ function Page3(): JSX.Element {
             },
           }
         );
-        const hash: React.SetStateAction<string> = res.data;
-        console.log(hash);
-        setHash(hash);
+        const transactionHash: React.SetStateAction<string> = res.data;
+        console.log(transactionHash);
+        setHash(transactionHash);
         setSnackbarSeverity('success');
         setSnackbarMessage('未承認TXを検知しました');
         setOpenSnackbar(true);

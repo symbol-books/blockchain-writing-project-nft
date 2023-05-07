@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await firstValueFrom(txRepo.announce(signedTx));
 
     await listener.open();
-    listener.unconfirmedAdded(clientAddress).subscribe((unconfirmedTx) => {
+    listener.unconfirmedAdded(clientAddress, signedTx.hash).subscribe((unconfirmedTx) => {
       console.log(unconfirmedTx);
       const transactionHash = unconfirmedTx.transactionInfo?.hash;
       listener.close();
