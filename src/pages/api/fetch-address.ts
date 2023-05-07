@@ -7,7 +7,7 @@ import { nodeList } from '@/consts/nodeList';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     const NODE = await connectNode(nodeList);
-    if (NODE === null) return '';
+    if (NODE === '') return '';
     const repo = new RepositoryFactoryHttp(NODE);
     const networkType = await firstValueFrom(repo.getNetworkType());
 
