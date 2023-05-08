@@ -74,9 +74,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           } catch {
             resolve('');
           }
-        }, 10000);
+        }, 5000);
 
-        // 監視をスタートして10秒以内にトランザクションを検知できた時の処理
+        // 監視をスタートして5秒以内にトランザクションを検知できた時の処理
         ws.onmessage = (e) => {
           const response = JSON.parse(e.data.toString());
           if ('uid' in response) {
