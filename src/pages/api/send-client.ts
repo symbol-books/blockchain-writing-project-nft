@@ -13,6 +13,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { connectNode } from '@/utils/connectNode';
 import { nodeList } from '@/consts/nodeList';
+import { currencyMosaicId, epochAdjustment, generationHash, networkType } from '@/consts/blockchainProperty';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -24,19 +25,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     const txRepo = repo.createTransactionRepository();
     const listener = repo.createListener();
-
-    const epochAdjustment = await firstValueFrom(repo.getEpochAdjustment());
-    const generationHash = await firstValueFrom(repo.getGenerationHash());
-    const networkType = await firstValueFrom(repo.getNetworkType());
-    const currencies = await firstValueFrom(repo.getCurrencies());
-
     const admin = Account.createFromPrivateKey(process.env.PRIVATE_KEY!, networkType);
     const clientAddress = Address.createFromRawAddress(req.body.address);
 
     const tx = TransferTransaction.create(
       Deadline.create(epochAdjustment),
       clientAddress,
-      [new Mosaic(currencies.currency.mosaicId as MosaicId, UInt64.fromUint(1000000))],
+      [new Mosaic(new MosaicId(currencyMosaicId), UInt64.fromUint(1000000))],
       EmptyMessage,
       networkType
     ).setMaxFee(100);
