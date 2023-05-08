@@ -4,7 +4,7 @@
 
 ## デモ URL
 
-＜これから書く＞
+https://blockchain-writing-project-base.vercel.app/
 
 ## 開発環境構築手順
 
@@ -38,7 +38,22 @@ npm run dev
 
 ## デプロイ手順
 
-＜これから書く＞
+#### 1.vercelでサインアップ後「Create a New Project」をクリック
+
+<img width="600" alt="スクリーンショット 2023-05-08 14 48 49" src="https://user-images.githubusercontent.com/47712051/236747213-e3bc27f1-f6ae-4964-8667-55175026703b.png">
+
+#### 2.作成したレポジトリを選択し「Import」をクリック
+
+<img width="600" alt="スクリーンショット 2023-05-08 14 49 12" src="https://user-images.githubusercontent.com/47712051/236747225-3238cf6a-9bfc-4091-944a-3f431cf0cae7.png">
+
+
+#### 3.環境変数部分だけ設定し「Deploy」をクリック
+
+<img width="600" alt="スクリーンショット 2023-05-08 14 54 15" src="https://user-images.githubusercontent.com/47712051/236747240-f8096b17-502c-4171-8f92-d9b5325d31b9.png">
+
+#### 4.デプロイ完了
+
+<img width="600" alt="スクリーンショット 2023-05-08 14 55 55" src="https://user-images.githubusercontent.com/47712051/236747257-1384e36a-99b3-4bbe-a650-a2e5f984d7e6.png">
 
 ## 技術スタック
 
