@@ -18,7 +18,7 @@ export const sendMessage = async (
   if (NODE === '') return '';
   const repo = new RepositoryFactoryHttp(NODE, {
     websocketUrl: NODE.replace('http', 'ws') + '/ws',
-    websocketInjected: WebSocket
+    websocketInjected: WebSocket,
   });
   const txRepo = repo.createTransactionRepository();
   const listener = repo.createListener();
@@ -41,7 +41,7 @@ export const sendMessage = async (
   await firstValueFrom(txRepo.announce(signedTx));
 
   await listener.open();
-  const transactionHash:string = await new Promise((resolve) => {
+  const transactionHash: string = await new Promise((resolve) => {
     listener.confirmed(client.address, signedTx.hash).subscribe((confirmedTx) => {
       console.log(confirmedTx);
       const transactionHash = confirmedTx.transactionInfo?.hash;
