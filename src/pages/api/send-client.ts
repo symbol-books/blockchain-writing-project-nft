@@ -45,30 +45,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const signedTx = admin.sign(tx, generationHash);
     await firstValueFrom(txRepo.announce(signedTx));
     await listener.open();
-    const transactionHash: string = await new Promise((resolve) => {
-      const timerId = setTimeout(async function () {
-        try {
-          //アナウンスと同時に承認されタイミング悪く監視上は検知できなかった場合の処理
-          const transactionStatusUrl = NODE + '/transactionStatus/' + signedTx.hash;
-          const response = await axios.get(transactionStatusUrl);
-          console.log(response);
-          if (response.data.code == 'Success') {
-            resolve(signedTx.hash);
-          } else {
-            resolve('');
-          }
-        } catch {
-          resolve('');
-        }
-      }, 3000); //３秒以内未承認を検知できなければ
-      listener.unconfirmedAdded(clientAddress, signedTx.hash).subscribe((unconfirmedTx) => {
-        console.log(unconfirmedTx);
-        const transactionHash = unconfirmedTx.transactionInfo?.hash;
+
+    //未承認トランザクションの検知
+    listener.unconfirmedAdded(clientAddress).subscribe((unconfirmedTx) => {
+      console.log(unconfirmedTx);
+      if (unconfirmedTx.transactionInfo?.hash === signedTx.hash) {
         listener.close();
-        clearTimeout(timerId);
-        resolve(transactionHash ?? '');
-      });
+        res.status(200).json(signedTx.hash);
+        return;
+      }
     });
-    return res.status(200).json(transactionHash);
+
+    setTimeout(async function () {
+      const response = await axios.get(NODE + '/transactionStatus/' + signedTx.hash);
+      console.log(response);
+      //未承認が検知できなかった場合の処理
+      if (response.data.code == 'Success') {
+        listener.close();
+        res.status(200).json(signedTx.hash);
+        return;
+      }
+      //トランザクションでエラーが発生した場合の処理
+      else{
+        listener.close();
+        res.status(400).json('');
+        return;
+      }
+    }, 3000); //タイマーを３秒に設定
   }
 }
