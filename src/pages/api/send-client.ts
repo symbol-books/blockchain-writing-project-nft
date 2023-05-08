@@ -46,6 +46,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await firstValueFrom(txRepo.announce(signedTx));
     await listener.open();
 
+    //未承認トランザクションの検知
+    listener.unconfirmedAdded(clientAddress).subscribe((unconfirmedTx) => {
+      console.log(unconfirmedTx);
+      if (unconfirmedTx.transactionInfo?.hash === signedTx.hash) {
+        listener.close();
+        clearTimeout(timerId);
+        res.status(200).json(signedTx.hash);
+        return;
+      }
+    });
+    
     const timerId = setTimeout(async function () {
       const response = await axios.get(NODE + '/transactionStatus/' + signedTx.hash);
       console.log(response);
@@ -62,16 +73,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return;
       }
     }, 3000); //タイマーを３秒に設定
-
-    //未承認トランザクションの検知
-    listener.unconfirmedAdded(clientAddress).subscribe((unconfirmedTx) => {
-      console.log(unconfirmedTx);
-      if (unconfirmedTx.transactionInfo?.hash === signedTx.hash) {
-        listener.close();
-        clearTimeout(timerId);
-        res.status(200).json(signedTx.hash);
-        return;
-      }
-    });
   }
 }
