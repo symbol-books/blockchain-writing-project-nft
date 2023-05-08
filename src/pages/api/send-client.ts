@@ -13,6 +13,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { connectNode } from '@/utils/connectNode';
 import { nodeList } from '@/consts/nodeList';
+import axios from 'axios';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -42,22 +43,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ).setMaxFee(100);
 
     const signedTx = admin.sign(tx, generationHash);
-    console.log('announce');
-    console.time('announce');
     await firstValueFrom(txRepo.announce(signedTx));
-    console.timeEnd('announce');
-    console.log('listener');
-    console.time('listener');
     await listener.open();
-    console.timeEnd('listener');
     const transactionHash: string = await new Promise((resolve) => {
-      console.log('unconfirmedAdded');
-      console.time('unconfirmedAdded');
+      const timerId = setTimeout(async function () {
+        try {
+          //アナウンスと同時に承認されタイミング悪く監視上は検知できなかった場合の処理
+          const transactionStatusUrl = NODE + '/transactionStatus/' + signedTx.hash;
+          const response = await axios.get(transactionStatusUrl);
+          console.log(response);
+          if (response.data.code == 'Success') {
+            resolve(signedTx.hash);
+          } else {
+            resolve('');
+          }
+        } catch {
+          resolve('');
+        }
+      }, 3000); //３秒以内未承認を検知できなければ
       listener.unconfirmedAdded(clientAddress, signedTx.hash).subscribe((unconfirmedTx) => {
-        console.timeEnd('unconfirmedAdded');
         console.log(unconfirmedTx);
         const transactionHash = unconfirmedTx.transactionInfo?.hash;
         listener.close();
+        clearTimeout(timerId);
         resolve(transactionHash ?? '');
       });
     });

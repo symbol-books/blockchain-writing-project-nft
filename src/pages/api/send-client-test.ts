@@ -53,6 +53,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // アナウンスしたトランザクションの監視
     const transactionStatusUrl = NODE + '/transactionStatus/' + signedTx.hash;
+
+    const response = await axios.get(transactionStatusUrl)
+    if (response.data.code == 'Success') {
+      return res.status(200).json(signedTx.hash);
+    }
     const wsEndpoint = NODE.replace('http', 'ws') + '/ws';
     const ws = new WebSocket(wsEndpoint);
     ws.onopen = () => console.log('start monitoring transaction');
