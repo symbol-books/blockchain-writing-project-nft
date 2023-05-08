@@ -9,7 +9,6 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { connectNode } from '@/utils/connectNode';
 import { nodeList } from '@/consts/nodeList';
-import { epochAdjustment, generationHash, networkType } from '@/consts/blockchainProperty';
 
 export const sendMessage = async (
   clientPrivateKey: string,
@@ -23,6 +22,10 @@ export const sendMessage = async (
   });
   const txRepo = repo.createTransactionRepository();
   const listener = repo.createListener();
+
+  const epochAdjustment = await firstValueFrom(repo.getEpochAdjustment());
+  const generationHash = await firstValueFrom(repo.getGenerationHash());
+  const networkType = await firstValueFrom(repo.getNetworkType());
 
   const client = Account.createFromPrivateKey(clientPrivateKey, networkType);
 
