@@ -56,10 +56,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return;
       }
     });
-    
+
     const timerId = setTimeout(async function () {
       const response = await axios.get(NODE + '/transactionStatus/' + signedTx.hash);
-      console.log(response);
+      console.log(response.data);
       //未承認が検知できなかった場合の処理
       if (response.data.code == 'Success') {
         listener.close();
