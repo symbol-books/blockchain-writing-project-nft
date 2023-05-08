@@ -42,10 +42,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ).setMaxFee(100);
 
     const signedTx = admin.sign(tx, generationHash);
-    await firstValueFrom(txRepo.announce(signedTx));
-
     await listener.open();
-    const transactionHash: string = await new Promise((resolve) => {
+    const transactionHash: string = await new Promise(async(resolve) => {
+      await firstValueFrom(txRepo.announce(signedTx));
       listener.unconfirmedAdded(clientAddress, signedTx.hash).subscribe((unconfirmedTx) => {
         console.log(unconfirmedTx);
         const transactionHash = unconfirmedTx.transactionInfo?.hash;
