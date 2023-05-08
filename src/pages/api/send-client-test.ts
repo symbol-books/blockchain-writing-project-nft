@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           } catch {
             resolve('');
           }
-        }, 3000);
+        }, 1000);
 
         // 監視をスタートして5秒以内にトランザクションを検知できた時の処理
         ws.onmessage = (e) => {
