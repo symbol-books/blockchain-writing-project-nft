@@ -38,14 +38,13 @@ npm run dev
 
 ## デプロイ手順
 
-#### 1.vercelでサインアップ後「Create a New Project」をクリック
+#### 1.vercel でサインアップ後「Create a New Project」をクリック
 
 <img width="600" alt="スクリーンショット 2023-05-08 14 48 49" src="https://user-images.githubusercontent.com/47712051/236747213-e3bc27f1-f6ae-4964-8667-55175026703b.png">
 
 #### 2.作成したレポジトリを選択し「Import」をクリック
 
 <img width="600" alt="スクリーンショット 2023-05-08 14 49 12" src="https://user-images.githubusercontent.com/47712051/236747225-3238cf6a-9bfc-4091-944a-3f431cf0cae7.png">
-
 
 #### 3.環境変数部分だけ設定し「Deploy」をクリック
 
