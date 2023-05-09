@@ -17,6 +17,7 @@ import { nodeList } from '@/consts/nodeList';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse):Promise<TransactionStatus | undefined> {
   if (req.method === 'POST') {
+    console.time('リージョン変更　US => TOKYO')
     console.log('start')
     console.time('time')
     const NODE = await connectNode(nodeList);
