@@ -45,7 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const signedTx = admin.sign(tx, generationHash);
     await listener.open();
-
     //未承認トランザクションの検知
     listener.unconfirmedAdded(clientAddress,signedTx.hash).subscribe(async(unconfirmedTx) => {
       const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
@@ -53,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       clearTimeout(timerId);
       res.status(200).json(response);
     });
-
+    await firstValueFrom(txRepo.announce(signedTx));
     //未承認トランザクションの検知ができなかった時の処理
     const timerId = setTimeout(async function () {
       const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
@@ -68,6 +67,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(400).json(response);
       }
     }, 1000); //タイマーを1秒に設定
-    await firstValueFrom(txRepo.announce(signedTx));
   }
 }
