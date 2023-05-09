@@ -56,7 +56,7 @@ export const sendMessage = async (
         listener.close();
         resolve(response);
       }
-    }, 3000); //タイマーを３秒に設定
+    }, 1000); //タイマーを1秒に設定
   });
   return transactionStatus;
 };

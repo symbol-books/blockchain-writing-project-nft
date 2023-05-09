@@ -68,6 +68,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         listener.close();
         res.status(400).json(response);
       }
-    }, 3000); //タイマーを３秒に設定
+    }, 1000); //タイマーを1秒に設定
   }
 }
