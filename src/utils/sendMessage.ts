@@ -52,7 +52,7 @@ export const sendMessage = async (
     //トランザクションでエラーが発生した場合の処理
     setTimeout(async function () {
       const response = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
-      if (response.group === 'failed') {
+      if (response.code !== 'Success') {
         listener.close();
         resolve(response);
       }
