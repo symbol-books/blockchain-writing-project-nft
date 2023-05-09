@@ -44,30 +44,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ).setMaxFee(100);
 
     const signedTx = admin.sign(tx, generationHash);
-    await listener.open().then(() => {
-      firstValueFrom(txRepo.announce(signedTx));
+    await listener.open().then(async() => {
+      await firstValueFrom(txRepo.announce(signedTx)).then(async () => {
+        //未承認トランザクションの検知
+        listener.unconfirmedAdded(clientAddress,signedTx.hash).subscribe(async(unconfirmedTx) => {
+          const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
+          listener.close();
+          clearTimeout(timerId);
+          res.status(200).json(response);
+        });
+        //未承認トランザクションの検知ができなかった時の処理
+        const timerId = setTimeout(async function () {
+          const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
+          //監視前に未承認TXがノードに認識されてしまった場合
+          if (response.code === 'Success') {
+            listener.close();
+            res.status(200).json(response);
+          }
+          //トランザクションでエラーが発生した場合の処理
+          else{
+            listener.close();
+            res.status(400).json(response);
+          }
+        }, 1000); //タイマーを1秒に設定
+      });
     });
-
-    //未承認トランザクションの検知
-    listener.unconfirmedAdded(clientAddress,signedTx.hash).subscribe(async(unconfirmedTx) => {
-      const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
-      listener.close();
-      clearTimeout(timerId);
-      res.status(200).json(response);
-    });
-    //未承認トランザクションの検知ができなかった時の処理
-    const timerId = setTimeout(async function () {
-      const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
-      //監視前に未承認TXがノードに認識されてしまった場合
-      if (response.code === 'Success') {
-        listener.close();
-        res.status(200).json(response);
-      }
-      //トランザクションでエラーが発生した場合の処理
-      else{
-        listener.close();
-        res.status(400).json(response);
-      }
-    }, 1000); //タイマーを1秒に設定
   }
 }
