@@ -118,6 +118,21 @@ function LeftDrawer(props: {
               </ListItemButton>
             </ListItem>
           </List>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  router.push('/page5');
+                  setOpenLeftDrawer(false);
+                }}
+              >
+                <ListItemIcon>
+                  <Looks3Icon />
+                </ListItemIcon>
+                <ListItemText primary={'管理者から送信2'} />
+              </ListItemButton>
+            </ListItem>
+          </List>
         </Box>
       </Drawer>
     </>
