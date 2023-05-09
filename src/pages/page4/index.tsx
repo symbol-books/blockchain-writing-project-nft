@@ -7,6 +7,7 @@ import { Box, Typography, Button, Backdrop, CircularProgress } from '@mui/materi
 import { AdminAddress, ClientPrivateKey } from '@/globalState/atoms';
 import { useRecoilValue } from 'recoil';
 import { sendMessage } from '@/utils/sendMessage';
+import { TransactionStatus } from 'symbol-sdk';
 
 function Page4(): JSX.Element {
   //共通設定
@@ -40,17 +41,23 @@ function Page4(): JSX.Element {
     }
     try {
       setProgress(true);
-      const transactionHash = await sendMessage(clientPrivateKey, adminAddress);
-      console.log(transactionHash);
-      setHash(transactionHash);
-      setSnackbarSeverity('success');
-      setSnackbarMessage('承認済みTXを検知しました');
-      setOpenSnackbar(true);
+      const transactionStatus:TransactionStatus|undefined = await sendMessage(clientPrivateKey, adminAddress);
+      if(transactionStatus === undefined){
+        setSnackbarSeverity('error');
+        setSnackbarMessage('NODEの接続に失敗しました');
+        setOpenSnackbar(true);  
+      }else if(transactionStatus.code === 'Success'){
+        setHash(transactionStatus.hash);
+        setSnackbarSeverity('success');
+        setSnackbarMessage(`${transactionStatus.group} TXを検知しました`);
+        setOpenSnackbar(true);  
+      }else{
+        setSnackbarSeverity('error');
+        setSnackbarMessage(`TXに失敗しました ${transactionStatus.code}`);
+        setOpenSnackbar(true);  
+      }
     } catch (error) {
       console.log(error);
-      setSnackbarSeverity('error');
-      setSnackbarMessage('TXに失敗しました。手数料不足などが考えられます');
-      setOpenSnackbar(true);
     } finally {
       setProgress(false);
     }

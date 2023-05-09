@@ -7,6 +7,7 @@ import AlertsDialog from '@/components/AlertsDialog';
 import { Box, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
 import { ClientAddress } from '@/globalState/atoms';
 import { useRecoilValue } from 'recoil';
+import { TransactionStatus } from 'symbol-sdk';
 
 function Page3(): JSX.Element {
   //共通設定
@@ -44,19 +45,23 @@ function Page3(): JSX.Element {
             },
           }
         );
-        const transactionHash: React.SetStateAction<string> = res.data;
-        console.log(transactionHash);
-        setHash(transactionHash);
-        setSnackbarSeverity('success');
-        setSnackbarMessage('未承認TXを検知しました');
-        setOpenSnackbar(true);
-      } catch (e: unknown) {
-        if (e instanceof Error) {
-          console.error(e.message);
+        const transactionStatus:TransactionStatus|undefined = res.data;
+        if(transactionStatus === undefined){
           setSnackbarSeverity('error');
-          setSnackbarMessage('TXに失敗しました');
-          setOpenSnackbar(true);
+          setSnackbarMessage('NODEの接続に失敗しました');
+          setOpenSnackbar(true);  
+        }else if(transactionStatus.code === 'Success'){
+          setHash(transactionStatus.hash);
+          setSnackbarSeverity('success');
+          setSnackbarMessage(`${transactionStatus.group} TXを検知しました`);
+          setOpenSnackbar(true);  
+        }else{
+          setSnackbarSeverity('error');
+          setSnackbarMessage(`TXに失敗しました ${transactionStatus.code}`);
+          setOpenSnackbar(true);  
         }
+      } catch (error) {
+        console.log(error);
       } finally {
         setProgress(false);
       }

@@ -4,6 +4,7 @@ import {
   Deadline,
   PlainMessage,
   RepositoryFactoryHttp,
+  TransactionStatus,
   TransferTransaction,
 } from 'symbol-sdk';
 import { firstValueFrom } from 'rxjs';
@@ -13,14 +14,15 @@ import { nodeList } from '@/consts/nodeList';
 export const sendMessage = async (
   clientPrivateKey: string,
   adminAddress: string
-): Promise<string> => {
+): Promise<TransactionStatus | undefined> => {
   const NODE = await connectNode(nodeList);
-  if (NODE === '') return '';
+  if (NODE === '') return undefined;
   const repo = new RepositoryFactoryHttp(NODE, {
     websocketUrl: NODE.replace('http', 'ws') + '/ws',
     websocketInjected: WebSocket,
   });
   const txRepo = repo.createTransactionRepository();
+  const tsRepo = repo.createTransactionStatusRepository();
   const listener = repo.createListener();
 
   const epochAdjustment = await firstValueFrom(repo.getEpochAdjustment());
@@ -39,15 +41,22 @@ export const sendMessage = async (
 
   const signedTx = client.sign(tx, generationHash);
   await firstValueFrom(txRepo.announce(signedTx));
-
   await listener.open();
-  const transactionHash: string = await new Promise((resolve) => {
-    listener.confirmed(client.address, signedTx.hash).subscribe((confirmedTx) => {
-      console.log(confirmedTx);
-      const transactionHash = confirmedTx.transactionInfo?.hash;
+  const transactionStatus: TransactionStatus = await new Promise((resolve) => {
+    //承認トランザクションの検知
+    listener.confirmed(client.address, signedTx.hash).subscribe(async(confirmedTx) => {
+      const response = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
       listener.close();
-      resolve(transactionHash ?? '');
+      resolve(response);
     });
+    //トランザクションでエラーが発生した場合の処理
+    setTimeout(async function () {
+      const response = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
+      if (response.group === 'failed') {
+        listener.close();
+        resolve(response);
+      }
+    }, 3000); //タイマーを３秒に設定
   });
-  return transactionHash;
+  return transactionStatus;
 };
