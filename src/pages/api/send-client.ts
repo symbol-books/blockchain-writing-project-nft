@@ -44,7 +44,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ).setMaxFee(100);
 
     const signedTx = admin.sign(tx, generationHash);
-    await firstValueFrom(txRepo.announce(signedTx));
     await listener.open();
 
     //未承認トランザクションの検知
@@ -69,5 +68,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(400).json(response);
       }
     }, 1000); //タイマーを1秒に設定
+    await firstValueFrom(txRepo.announce(signedTx));
   }
 }
