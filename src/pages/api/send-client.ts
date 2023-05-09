@@ -44,8 +44,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ).setMaxFee(100);
 
     const signedTx = admin.sign(tx, generationHash);
-    await listener.open();
     await firstValueFrom(txRepo.announce(signedTx));
+    await listener.open();
 
     //未承認トランザクションの検知
     listener.unconfirmedAdded(clientAddress,signedTx.hash).subscribe(async(unconfirmedTx) => {
