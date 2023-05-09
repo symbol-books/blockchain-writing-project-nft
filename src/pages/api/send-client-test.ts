@@ -52,36 +52,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const signedTx = admin.sign(tx, generationHash);
     await firstValueFrom(txRepo.announce(signedTx));
     await listener.open();
-    console.log('listener.open')
-    console.timeLog('time')
-
-    //未承認トランザクションの検知
-    listener.unconfirmedAdded(clientAddress,signedTx.hash).subscribe(async(unconfirmedTx) => {
-      console.log('unconfirmedAdded')
-      console.timeLog('time')
-
-      const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
-      listener.close();
-      clearTimeout(timerId);
-      res.status(200).json(response);
-    });
-    //未承認トランザクションの検知ができなかった時の処理
-    const timerId = setTimeout(async function () {
-      const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
-      //監視前に未承認TXがノードに認識されてしまった場合
-      if (response.code === 'Success') {
-        console.log(response.code)
-        console.timeLog('time')    
+    const transactionStatus: TransactionStatus = await new Promise((resolve) => {
+      //承認トランザクションの検知
+      listener.unconfirmedAdded(clientAddress,signedTx.hash).subscribe(async(unconfirmedTx) => {
+        console.log('unconfirmedAdded')
+        console.timeLog('time')  
+        const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
         listener.close();
-        res.status(200).json(response);
-      }
+        clearTimeout(timerId);  
+        resolve(response);
+      });
       //トランザクションでエラーが発生した場合の処理
-      else{
-        console.log(response.code)
-        console.timeLog('time')
-        listener.close();
-        res.status(400).json(response);
-      }
-    }, 1000); //タイマーを1秒に設定
+      const timerId = setTimeout(async function () {
+        const response = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
+        if (response.code === 'Success') {
+          console.log(response.code)
+          console.timeLog('time')    
+          listener.close();
+          resolve(response);
+        }
+        //トランザクションでエラーが発生した場合の処理
+        else{
+          console.log(response.code)
+          console.timeLog('time')
+          listener.close();
+          resolve(response);
+        }
+      }, 1000); //タイマーを1秒に設定
+    });
+    res.status(200).json(transactionStatus);
+    return
   }
 }
