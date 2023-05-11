@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LeftDrawer from '@/components/LeftDrawer';
 import Header from '@/components/Header';
-import axios from 'axios';
 import AlertsSnackbar from '@/components/AlertsSnackbar';
 import AlertsDialog from '@/components/AlertsDialog';
 import { Box, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
-import { ClientAddress } from '@/globalState/atoms';
+import { AdminAddress, ClientAddress, ClientPrivateKey } from '@/globalState/atoms';
 import { useRecoilValue } from 'recoil';
-import { TransactionStatus } from 'symbol-sdk';
+import { sendMessage } from '@/utils/sendMessage';
+import { PublicAccount, TransactionStatus } from 'symbol-sdk';
+import useSssInit from '@/hooks/useSssInit';
+import { networkType } from '@/consts/blockchainProperty';
+import { sendMessageWithSSS } from '@/utils/sendMessageWithSSS';
 
-function Page3(): JSX.Element {
+function Page6(): JSX.Element {
   //共通設定
   const [progress, setProgress] = useState<boolean>(false); //ローディングの設定
   const [openLeftDrawer, setOpenLeftDrawer] = useState<boolean>(false); //LeftDrawerの設定
@@ -19,56 +22,64 @@ function Page3(): JSX.Element {
   const [dialogTitle, setDialogTitle] = useState<string>(''); //AlertsDialogの設定(共通)
   const [dialogMessage, setDialogMessage] = useState<string>(''); //AlertsDialogの設定(共通)
 
+  //SSS共通設定
+  const { clientPublicKey,sssState } = useSssInit();
+  const [clientAddress, setClientAddress] = useState<string>('');
+  useEffect(() => {
+    if(sssState === 'ACTIVE'){
+      const clientPublicAccount = PublicAccount.createFromPublicKey(
+        clientPublicKey,
+        networkType
+      )  
+      setClientAddress(clientPublicAccount.address.plain())
+    }
+  }, [clientPublicKey, sssState]);
+
   //ページ個別設定
   const [hash, setHash] = useState<string>('');
-  const clientAddress = useRecoilValue(ClientAddress);
-  const [openDialogSendXym, setOpenDialogSendXym] = useState<boolean>(false); //AlertsDialogの設定(個別)
-  const handleAgreeClickSendXym = () => {
+  const adminAddress = useRecoilValue(AdminAddress);
+  const [openDialogSendMessage, setOpenDialogSendMessage] = useState<boolean>(false); //AlertsDialogの設定(個別)
+  const handleAgreeClickSendMessage = async () => {
     if (clientAddress === '') {
       //事前チェック
       setSnackbarSeverity('error');
-      setSnackbarMessage('クライアントのアカウントを作成して下さい');
+      setSnackbarMessage('クライアントのアカウントがありません');
       setOpenSnackbar(true);
       return;
     }
-    const fetchData = async () => {
-      try {
-        setProgress(true);
-        const res = await axios.post(
-          '/api/send-client',
-          {
-            address: clientAddress,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        const transactionStatus: TransactionStatus | undefined = res.data;
-        if (transactionStatus === undefined) {
-          setSnackbarSeverity('error');
-          setSnackbarMessage('NODEの接続に失敗しました');
-          setOpenSnackbar(true);
-        } else if (transactionStatus.code === 'Success') {
-          setHash(transactionStatus.hash);
-          setSnackbarSeverity('success');
-          setSnackbarMessage(`${transactionStatus.group} TXを検知しました`);
-          setOpenSnackbar(true);
-        } else {
-          setSnackbarSeverity('error');
-          setSnackbarMessage(`TXに失敗しました ${transactionStatus.code}`);
-          setOpenSnackbar(true);
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setProgress(false);
+    if (adminAddress === '') {
+      //事前チェック
+      setSnackbarSeverity('error');
+      setSnackbarMessage('管理者のアドレスを確認して下さい');
+      setOpenSnackbar(true);
+      return;
+    }
+    try {
+      setProgress(true);
+      const transactionStatus: TransactionStatus | undefined = await sendMessageWithSSS(
+        clientAddress,
+        adminAddress
+      );
+      if (transactionStatus === undefined) {
+        setSnackbarSeverity('error');
+        setSnackbarMessage('NODEの接続に失敗しました');
+        setOpenSnackbar(true);
+      } else if (transactionStatus.code === 'Success') {
+        setHash(transactionStatus.hash);
+        setSnackbarSeverity('success');
+        setSnackbarMessage(`${transactionStatus.group} TXを検知しました`);
+        setOpenSnackbar(true);
+      } else {
+        setSnackbarSeverity('error');
+        setSnackbarMessage(`TXに失敗しました ${transactionStatus.code}`);
+        setOpenSnackbar(true);
       }
-    };
-    fetchData();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setProgress(false);
+    }
   };
-
   return (
     <>
       <Header setOpenLeftDrawer={setOpenLeftDrawer} />
@@ -81,11 +92,11 @@ function Page3(): JSX.Element {
         snackbarMessage={snackbarMessage}
       />
       <AlertsDialog
-        openDialog={openDialogSendXym}
-        setOpenDialog={setOpenDialogSendXym}
+        openDialog={openDialogSendMessage}
+        setOpenDialog={setOpenDialogSendMessage}
         handleAgreeClick={() => {
-          handleAgreeClickSendXym();
-          setOpenDialogSendXym(false);
+          handleAgreeClickSendMessage();
+          setOpenDialogSendMessage(false);
         }}
         dialogTitle={dialogTitle}
         dialogMessage={dialogMessage}
@@ -103,21 +114,21 @@ function Page3(): JSX.Element {
           flexDirection='column'
         >
           <Typography component='div' variant='h6' sx={{ mt: 5, mb: 1 }}>
-            管理者側からクライアントへ1xym送金
+            クライアントから管理者へメッセージ送信
           </Typography>
           <Typography component='div' variant='caption' sx={{ mt: 1, mb: 5 }}>
-            * 管理者側での未承認トランザクション検知処理を行います
+            * クライアント側での承認トランザクション検知処理を行います
           </Typography>
           <Button
             color='primary'
             variant='contained'
             onClick={() => {
-              setDialogTitle('入金');
-              setDialogMessage('管理者側からクライアントへ1xym送金しますか？');
-              setOpenDialogSendXym(true);
+              setDialogTitle('メッセージ送信');
+              setDialogMessage('クライアントから管理者へメッセージを送信しますか？');
+              setOpenDialogSendMessage(true);
             }}
           >
-            入金
+            送信
           </Button>
           {hash !== '' ? (
             <Typography
@@ -138,4 +149,4 @@ function Page3(): JSX.Element {
     </>
   );
 }
-export default Page3;
+export default Page6;

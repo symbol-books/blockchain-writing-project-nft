@@ -15,7 +15,10 @@ import { firstValueFrom } from 'rxjs';
 import { connectNode } from '@/utils/connectNode';
 import { nodeList } from '@/consts/nodeList';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse):Promise<TransactionStatus | undefined> {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+): Promise<TransactionStatus | undefined> {
   if (req.method === 'POST') {
     const NODE = await connectNode(nodeList);
     if (NODE === '') return undefined;
@@ -48,22 +51,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await listener.open();
 
     //未承認トランザクションの検知
-    listener.unconfirmedAdded(clientAddress,signedTx.hash).subscribe(async(unconfirmedTx) => {
-      const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
+    listener.unconfirmedAdded(clientAddress, signedTx.hash).subscribe(async (unconfirmedTx) => {
+      const response: TransactionStatus = await firstValueFrom(
+        tsRepo.getTransactionStatus(signedTx.hash)
+      );
       listener.close();
       clearTimeout(timerId);
       res.status(200).json(response);
     });
     //未承認トランザクションの検知ができなかった時の処理
     const timerId = setTimeout(async function () {
-      const response:TransactionStatus = await firstValueFrom(tsRepo.getTransactionStatus(signedTx.hash))
+      const response: TransactionStatus = await firstValueFrom(
+        tsRepo.getTransactionStatus(signedTx.hash)
+      );
       //監視前に未承認TXがノードに認識されてしまった場合
       if (response.code === 'Success') {
         listener.close();
         res.status(200).json(response);
       }
       //トランザクションでエラーが発生した場合の処理
-      else{
+      else {
         listener.close();
         res.status(400).json(response);
       }

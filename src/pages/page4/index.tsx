@@ -41,20 +41,23 @@ function Page4(): JSX.Element {
     }
     try {
       setProgress(true);
-      const transactionStatus:TransactionStatus|undefined = await sendMessage(clientPrivateKey, adminAddress);
-      if(transactionStatus === undefined){
+      const transactionStatus: TransactionStatus | undefined = await sendMessage(
+        clientPrivateKey,
+        adminAddress
+      );
+      if (transactionStatus === undefined) {
         setSnackbarSeverity('error');
         setSnackbarMessage('NODEの接続に失敗しました');
-        setOpenSnackbar(true);  
-      }else if(transactionStatus.code === 'Success'){
+        setOpenSnackbar(true);
+      } else if (transactionStatus.code === 'Success') {
         setHash(transactionStatus.hash);
         setSnackbarSeverity('success');
         setSnackbarMessage(`${transactionStatus.group} TXを検知しました`);
-        setOpenSnackbar(true);  
-      }else{
+        setOpenSnackbar(true);
+      } else {
         setSnackbarSeverity('error');
         setSnackbarMessage(`TXに失敗しました ${transactionStatus.code}`);
-        setOpenSnackbar(true);  
+        setOpenSnackbar(true);
       }
     } catch (error) {
       console.log(error);

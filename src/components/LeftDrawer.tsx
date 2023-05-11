@@ -14,6 +14,8 @@ import LooksOneIcon from '@mui/icons-material/LooksOne';
 import LooksTwoIcon from '@mui/icons-material/LooksTwo';
 import Looks3Icon from '@mui/icons-material/Looks3';
 import Looks4Icon from '@mui/icons-material/Looks4';
+import Looks5Icon from '@mui/icons-material/Looks5';
+import Looks6Icon from '@mui/icons-material/Looks6';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
@@ -115,6 +117,36 @@ function LeftDrawer(props: {
                   <Looks4Icon />
                 </ListItemIcon>
                 <ListItemText primary={'クライアントから送信'} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  router.push('/page5');
+                  setOpenLeftDrawer(false);
+                }}
+              >
+                <ListItemIcon>
+                  <Looks5Icon />
+                </ListItemIcon>
+                <ListItemText primary={'SSS連携'} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  router.push('/page6');
+                  setOpenLeftDrawer(false);
+                }}
+              >
+                <ListItemIcon>
+                  <Looks6Icon />
+                </ListItemIcon>
+                <ListItemText primary={'SSSでクライアントから送信'} />
               </ListItemButton>
             </ListItem>
           </List>
