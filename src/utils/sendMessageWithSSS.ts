@@ -11,6 +11,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { connectNode } from '@/utils/connectNode';
 import { nodeList } from '@/consts/nodeList';
+import axios from 'axios';
 
 //SSS用設定
 interface SSSWindow extends Window {
@@ -20,7 +21,6 @@ declare const window: SSSWindow
 
 export const sendMessageWithSSS = async (
   clientAddress: string,
-  adminAddress: string
 ): Promise<TransactionStatus | undefined> => {
   const NODE = await connectNode(nodeList);
   if (NODE === '') return undefined;
@@ -37,6 +37,9 @@ export const sendMessageWithSSS = async (
   const networkType = await firstValueFrom(repo.getNetworkType());
 
   const clientAddressAccount = Address.createFromRawAddress(clientAddress);
+
+  const res = await axios.get('/api/fetch-address');
+  const adminAddress:string = res.data;
 
   const tx = TransferTransaction.create(
     Deadline.create(epochAdjustment),

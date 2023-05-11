@@ -4,9 +4,6 @@ import Header from '@/components/Header';
 import AlertsSnackbar from '@/components/AlertsSnackbar';
 import AlertsDialog from '@/components/AlertsDialog';
 import { Box, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
-import { AdminAddress, ClientAddress, ClientPrivateKey } from '@/globalState/atoms';
-import { useRecoilValue } from 'recoil';
-import { sendMessage } from '@/utils/sendMessage';
 import { PublicAccount, TransactionStatus } from 'symbol-sdk';
 import useSssInit from '@/hooks/useSssInit';
 import { networkType } from '@/consts/blockchainProperty';
@@ -37,29 +34,11 @@ function Page6(): JSX.Element {
 
   //ページ個別設定
   const [hash, setHash] = useState<string>('');
-  const adminAddress = useRecoilValue(AdminAddress);
   const [openDialogSendMessage, setOpenDialogSendMessage] = useState<boolean>(false); //AlertsDialogの設定(個別)
   const handleAgreeClickSendMessage = async () => {
-    if (clientAddress === '') {
-      //事前チェック
-      setSnackbarSeverity('error');
-      setSnackbarMessage('クライアントのアカウントがありません');
-      setOpenSnackbar(true);
-      return;
-    }
-    if (adminAddress === '') {
-      //事前チェック
-      setSnackbarSeverity('error');
-      setSnackbarMessage('管理者のアドレスを確認して下さい');
-      setOpenSnackbar(true);
-      return;
-    }
     try {
       setProgress(true);
-      const transactionStatus: TransactionStatus | undefined = await sendMessageWithSSS(
-        clientAddress,
-        adminAddress
-      );
+      const transactionStatus: TransactionStatus | undefined = await sendMessageWithSSS(clientAddress);
       if (transactionStatus === undefined) {
         setSnackbarSeverity('error');
         setSnackbarMessage('NODEの接続に失敗しました');

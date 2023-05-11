@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import AlertsSnackbar from '@/components/AlertsSnackbar';
 import AlertsDialog from '@/components/AlertsDialog';
 import { Box, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
-import { AdminAddress, ClientPrivateKey } from '@/globalState/atoms';
+import { ClientPrivateKey } from '@/globalState/atoms';
 import { useRecoilValue } from 'recoil';
 import { sendMessage } from '@/utils/sendMessage';
 import { TransactionStatus } from 'symbol-sdk';
@@ -22,7 +22,6 @@ function Page4(): JSX.Element {
   //ページ個別設定
   const [hash, setHash] = useState<string>('');
   const clientPrivateKey = useRecoilValue(ClientPrivateKey);
-  const adminAddress = useRecoilValue(AdminAddress);
   const [openDialogSendMessage, setOpenDialogSendMessage] = useState<boolean>(false); //AlertsDialogの設定(個別)
   const handleAgreeClickSendMessage = async () => {
     if (clientPrivateKey === '') {
@@ -32,18 +31,10 @@ function Page4(): JSX.Element {
       setOpenSnackbar(true);
       return;
     }
-    if (adminAddress === '') {
-      //事前チェック
-      setSnackbarSeverity('error');
-      setSnackbarMessage('管理者のアドレスを確認して下さい');
-      setOpenSnackbar(true);
-      return;
-    }
     try {
       setProgress(true);
       const transactionStatus: TransactionStatus | undefined = await sendMessage(
-        clientPrivateKey,
-        adminAddress
+        clientPrivateKey
       );
       if (transactionStatus === undefined) {
         setSnackbarSeverity('error');
