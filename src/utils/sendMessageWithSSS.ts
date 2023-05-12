@@ -4,6 +4,7 @@ import {
   Deadline,
   PlainMessage,
   RepositoryFactoryHttp,
+  SignedTransaction,
   TransactionHttp,
   TransactionStatus,
   TransferTransaction,
@@ -50,7 +51,6 @@ export const sendMessageWithSSS = async (
   ).setMaxFee(100);
 
   window.SSS.setTransaction(tx)
-  // @ts-ignore
   const signedTx:SignedTransaction = await new Promise((resolve) => {
     resolve(window.SSS.requestSign());
   })

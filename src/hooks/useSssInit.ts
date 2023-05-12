@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 //SSS用設定
 interface SSSWindow extends Window {
   SSS: any
+  isAllowedSSS: () => boolean
 }
 declare const window: SSSWindow
 
@@ -13,7 +14,6 @@ const useSssInit = () => {
   useEffect(() => {
     setTimeout(() => {
       try {
-        // @ts-ignore
         if (window.isAllowedSSS()) {
           setSssState('ACTIVE');
           const publicKey = window.SSS.activePublicKey;
