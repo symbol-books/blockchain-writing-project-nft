@@ -102,8 +102,8 @@ function CheckAddressNFT(): JSX.Element {
           <Grid container alignItems="center" justifyContent="center">
           {nfts.length>0&&
                 nfts.map((item: NFT, index) => (
-                  
-                <Card sx={{maxWidth:230, m:2}}>
+                <div key={item.mosaicId} className="group relative">
+                <Card sx={{maxWidth:230, m:2} }>
                 <CardHeader
                     title={item.name}
                     subheader={"ID: "+item.mosaicId}
@@ -119,6 +119,7 @@ function CheckAddressNFT(): JSX.Element {
                 </Typography>
                 </CardContent>
             </Card>
+            </div>
             ))}
           </Grid>
           
