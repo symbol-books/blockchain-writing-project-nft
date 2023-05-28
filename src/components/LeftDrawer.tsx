@@ -184,7 +184,7 @@ function LeftDrawer(props: {
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
-                  router.push('/checkaddress');
+                  router.push('/checkaddressnft');
                   setOpenLeftDrawer(false);
                 }}
               >

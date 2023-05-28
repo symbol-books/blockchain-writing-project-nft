@@ -8,7 +8,7 @@ import {createNFTTransaction} from '@/utils/createNFTTransaction';
 import {sendTransactionWithSSS} from '@/utils/sendTransactionWithSSS';
 import { AggregateTransaction, MosaicId, Transaction, TransactionStatus } from 'symbol-sdk';
 
-function createNFT(): JSX.Element {
+function CreateNFT(): JSX.Element {
   //共通設定
   const [progress, setProgress] = useState<boolean>(false); //ローディングの設定
   const [openLeftDrawer, setOpenLeftDrawer] = useState<boolean>(false); //LeftDrawerの設定
@@ -130,4 +130,4 @@ function createNFT(): JSX.Element {
     </>
   );
 }
-export default createNFT;
+export default CreateNFT;

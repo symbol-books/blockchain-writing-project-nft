@@ -15,7 +15,7 @@ interface NFT {
   description:string
 }
 
-function createMosaic(): JSX.Element {
+function CheckAddressNFT(): JSX.Element {
   //共通設定
   const [progress, setProgress] = useState<boolean>(false); //ローディングの設定
   const [openLeftDrawer, setOpenLeftDrawer] = useState<boolean>(false); //LeftDrawerの設定
@@ -129,4 +129,4 @@ function createMosaic(): JSX.Element {
 }
 
 
-export default createMosaic;
+export default CheckAddressNFT;
