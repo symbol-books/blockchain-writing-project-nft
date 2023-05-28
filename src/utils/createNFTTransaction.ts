@@ -14,6 +14,7 @@ import {
   UInt64,
   Convert,
   Transaction,
+  MetadataTransactionService,
 } from 'symbol-sdk';
 import { firstValueFrom } from 'rxjs';
 import { connectNode } from '@/utils/connectNode';
@@ -36,6 +37,8 @@ export const createNFTTransaction = async (
     websocketUrl: NODE.replace('http', 'ws') + '/ws',
     websocketInjected: WebSocket,
   });
+  const metaRepo = repo.createMetadataRepository();
+  const metaTransactionService = new MetadataTransactionService(metaRepo);
   const epochAdjustment = await firstValueFrom(repo.getEpochAdjustment());
   const networkType = await firstValueFrom(repo.getNetworkType());
   const nonce = MosaicNonce.createRandom();
@@ -58,12 +61,22 @@ export const createNFTTransaction = async (
     UInt64.fromUint(1),
     networkType,
   );
+  // const nameMetadataTransaction = metaTransactionService.createMosaicMetadataTransaction(
+  //   Deadline.create(epochAdjustment),
+  //   networkType,
+  //   clientPublicAccount.address,
+  //   mosaicId,
+  //   KeyGenerator.generateUInt64Key('NAME'),
+  //   name,
+  //   clientPublicAccount.address,
+  //   UInt64.fromUint(1)
+  //   )
   const nameMetadataTransaction = MosaicMetadataTransaction.create(
     Deadline.create(epochAdjustment),
     clientPublicAccount.address,
     KeyGenerator.generateUInt64Key('NAME'),
     mosaicId,
-    name.length,
+    Convert.utf8ToUint8(name).length,
     Convert.utf8ToUint8(name),
     networkType,
   );
@@ -72,7 +85,7 @@ export const createNFTTransaction = async (
     clientPublicAccount.address,
     KeyGenerator.generateUInt64Key('IMAGE'),
     mosaicId,
-    imageUrl.length,
+    Convert.utf8ToUint8(imageUrl).length,
     Convert.utf8ToUint8(imageUrl),
     networkType,
   );
@@ -81,7 +94,7 @@ export const createNFTTransaction = async (
     clientPublicAccount.address,
     KeyGenerator.generateUInt64Key('DESCRIPTION'),
     mosaicId,
-    description.length,
+    Convert.utf8ToUint8(description).length,
     Convert.utf8ToUint8(description),
     networkType,
   );
