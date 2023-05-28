@@ -40,18 +40,20 @@ export const createNFTTransaction = async (
   const networkType = await firstValueFrom(repo.getNetworkType());
   const nonce = MosaicNonce.createRandom();
   const clientPublicAccount = PublicAccount.createFromPublicKey(window.SSS.activePublicKey, networkType);
+  const mosaicId = MosaicId.createFromNonce(nonce, clientPublicAccount.address); 
   const mosaicDefinitionTransaction = MosaicDefinitionTransaction.create(
     Deadline.create(epochAdjustment),
     nonce,
-    MosaicId.createFromNonce(nonce, clientPublicAccount.address),
+    mosaicId,
     MosaicFlags.create(false,true,false,false),
     0,
     UInt64.fromUint(0),
     networkType
   ).setMaxFee(100);
+
   const mosaicSupplyChangeTransaction = MosaicSupplyChangeTransaction.create(
     Deadline.create(epochAdjustment),
-    mosaicDefinitionTransaction.mosaicId,
+    mosaicId,
     MosaicSupplyChangeAction.Increase,
     UInt64.fromUint(1),
     networkType,
@@ -60,7 +62,7 @@ export const createNFTTransaction = async (
     Deadline.create(epochAdjustment),
     clientPublicAccount.address,
     KeyGenerator.generateUInt64Key('NAME'),
-    mosaicDefinitionTransaction.mosaicId,
+    mosaicId,
     name.length,
     Convert.utf8ToUint8(name),
     networkType,
@@ -69,7 +71,7 @@ export const createNFTTransaction = async (
     Deadline.create(epochAdjustment),
     clientPublicAccount.address,
     KeyGenerator.generateUInt64Key('IMAGE'),
-    mosaicDefinitionTransaction.mosaicId,
+    mosaicId,
     imageUrl.length,
     Convert.utf8ToUint8(imageUrl),
     networkType,
@@ -78,7 +80,7 @@ export const createNFTTransaction = async (
     Deadline.create(epochAdjustment),
     clientPublicAccount.address,
     KeyGenerator.generateUInt64Key('DESCRIPTION'),
-    mosaicDefinitionTransaction.mosaicId,
+    mosaicId,
     description.length,
     Convert.utf8ToUint8(description),
     networkType,
@@ -99,6 +101,6 @@ export const createNFTTransaction = async (
 
   return {
     transaction:aggregateTransaction,
-    mosaicId:mosaicDefinitionTransaction.mosaicId
+    mosaicId:mosaicId
   };
 };
