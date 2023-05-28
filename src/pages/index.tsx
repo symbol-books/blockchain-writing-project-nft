@@ -18,7 +18,7 @@ function Home(): JSX.Element {
         flexDirection='column'
       >
         <Typography component='div' variant='h6' sx={{ mt: 5, mb: 5 }}>
-          Next.js + Recoil + Material-UI + symbol-sdk@2.0.4のデモ
+          NFT Demo
         </Typography>
       </Box>
     </>

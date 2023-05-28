@@ -60,7 +60,7 @@ function LeftDrawer(props: {
               </ListItemButton>
             </ListItem>
           </List>
-          <List>
+          {/* <List>
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
@@ -147,6 +147,51 @@ function LeftDrawer(props: {
                   <Looks6Icon />
                 </ListItemIcon>
                 <ListItemText primary={'SSSでクライアントから送信'} />
+              </ListItemButton>
+            </ListItem>
+          </List> */}
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  router.push('/createmosaic');
+                  setOpenLeftDrawer(false);
+                }}
+              >
+                <ListItemIcon>
+                  <LooksOneIcon />
+                </ListItemIcon>
+                <ListItemText primary={'NFTの発行'} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  router.push('/checknft');
+                  setOpenLeftDrawer(false);
+                }}
+              >
+                <ListItemIcon>
+                  <LooksTwoIcon />
+                </ListItemIcon>
+                <ListItemText primary={'モザイクIDからのNFTの確認'} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  router.push('/checkaddress');
+                  setOpenLeftDrawer(false);
+                }}
+              >
+                <ListItemIcon>
+                  <Looks3Icon />
+                </ListItemIcon>
+                <ListItemText primary={'アドレスからのNFTの確認'} />
               </ListItemButton>
             </ListItem>
           </List>

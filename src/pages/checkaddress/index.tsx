@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import LeftDrawer from '@/components/LeftDrawer';
 import Header from '@/components/Header';
-import axios from 'axios';
 import AlertsSnackbar from '@/components/AlertsSnackbar';
 import AlertsDialog from '@/components/AlertsDialog';
-import { Box, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
-import { AdminAddress } from '@/globalState/atoms';
-import { useRecoilState } from 'recoil';
+import { Box, Typography, Button, Backdrop, CircularProgress, TextField, Card, CardHeader, CardMedia, CardContent, Grid} from '@mui/material';
 
-function Page2(): JSX.Element {
+import {getAccountNft} from '@/utils/getAccountNft';
+
+
+interface NFT {
+  mosaicId:string,
+  name: string,
+  imageUrl:string,
+  description:string
+}
+
+function createMosaic(): JSX.Element {
   //共通設定
   const [progress, setProgress] = useState<boolean>(false); //ローディングの設定
   const [openLeftDrawer, setOpenLeftDrawer] = useState<boolean>(false); //LeftDrawerの設定
@@ -17,33 +24,31 @@ function Page2(): JSX.Element {
   const [snackbarMessage, setSnackbarMessage] = useState<string>(''); //AlertsSnackbarの設定
   const [dialogTitle, setDialogTitle] = useState<string>(''); //AlertsDialogの設定(共通)
   const [dialogMessage, setDialogMessage] = useState<string>(''); //AlertsDialogの設定(共通)
+  const [address, setAddress] = useState<string>('');
+
+//   NFTのメタデータ（ERC-721準拠）
+  const [nfts, setNfts] = useState<NFT[] | []>([]);
+
+ 
 
   //ページ個別設定
-  const [adminAddress, setAdminAddress] = useRecoilState(AdminAddress);
   const [openDialogGetAddress, setOpenDialogGetAddress] = useState<boolean>(false); //AlertsDialogの設定(個別)
-  const handleAgreeClickGetAddress = () => {
-    const fetchData = async () => {
-      try {
+  const handleAgreeClickGetAddress = async () => {
+    try {
         setProgress(true);
-        const res = await axios.get('/api/fetch-address');
-        const address:string = res.data;
-        console.log(address);
-        setAdminAddress(address);
-        setSnackbarSeverity('success');
-        setSnackbarMessage('管理者アドレスを取得しました');
-        setOpenSnackbar(true);
-      } catch (e: unknown) {
-        if (e instanceof Error) {
-          console.error(e.message);
-          setSnackbarSeverity('error');
-          setSnackbarMessage('管理者アドレスを取得に失敗しました');
-          setOpenSnackbar(true);
+
+        const mosaicInfo = await getAccountNft(address);
+        if(typeof(mosaicInfo)!=="undefined"){
+          setNfts(mosaicInfo);
         }
+        setSnackbarSeverity('success');
+        setSnackbarMessage('NFTの取得に成功しました');
+
+      } catch (error) {
+        console.log(error);
       } finally {
         setProgress(false);
       }
-    };
-    fetchData();
   };
 
   return (
@@ -73,43 +78,55 @@ function Page2(): JSX.Element {
         </Backdrop>
       ) : (
         <Box
-          sx={{ p: 3 }}
+          sx={{ p: 1 }}
           display='flex'
           alignItems='center'
           justifyContent='center'
           flexDirection='column'
         >
-          <Typography component='div' variant='h6' sx={{ mt: 5, mb: 5 }}>
-            管理者側のアドレス確認
+          <Typography component='div' variant='h6' sx={{ mt: 5, mb: 2 }}>
+            アドレスの保有するNFTの確認
           </Typography>
+          <TextField id="outlined-basic" label="アドレス" variant="outlined" value={address} onChange={(e)=>{setAddress(e.target.value)}} sx={{ mt: 1, mb: 2 , width:"40%", minWidth:300}}/>
           <Button
             color='primary'
             variant='contained'
             onClick={() => {
-              setDialogTitle('アドレス確認');
-              setDialogMessage('管理者側のアドレスを確認しますか？');
-              setOpenDialogGetAddress(true);
+                setDialogTitle('確認');
+                setDialogMessage('入力した情報でアドレスのNFTを確認しますか？');
+                setOpenDialogGetAddress(true);
             }}
           >
             確認
           </Button>
-          {adminAddress !== '' ? (
-            <Typography
-              component='div'
-              variant='body1'
-              sx={{ mt: 5, mb: 1 }}
-              onClick={() => {
-                window.open(`https://testnet.symbol.fyi/accounts/${adminAddress}`, '_blank');
-              }}
-            >
-              {`アドレス : ${adminAddress}`}
-            </Typography>
-          ) : (
-            <></>
-          )}
+          <Grid container alignItems="center" justifyContent="center">
+          {nfts.length>0&&
+                nfts.map((item: NFT, index) => (
+                  
+                <Card sx={{maxWidth:230, m:2}}>
+                <CardHeader
+                    title={item.name}
+                    subheader={"ID: "+item.mosaicId}
+                />
+                <CardMedia
+                    sx={{height:100, pt:"5%",pb:"5%"}}
+                    component="img"
+                    image={item.imageUrl}
+                />
+                <CardContent>
+                <Typography variant="body2" color="textSecondary" component="p">
+                    {item.description}
+                </Typography>
+                </CardContent>
+            </Card>
+            ))}
+          </Grid>
+          
         </Box>
       )}
     </>
   );
 }
-export default Page2;
+
+
+export default createMosaic;
