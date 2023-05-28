@@ -154,7 +154,7 @@ function LeftDrawer(props: {
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
-                  router.push('/createmosaic');
+                  router.push('/createnft');
                   setOpenLeftDrawer(false);
                 }}
               >
