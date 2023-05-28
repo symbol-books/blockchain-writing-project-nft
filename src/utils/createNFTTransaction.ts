@@ -31,7 +31,7 @@ export const createNFTTransaction = async (
 ): Promise<{transaction:Transaction, mosaicId:MosaicId} | undefined> => {
   // ): Promise<TransactionStatus | undefined> => {
   const NODE = await connectNode(nodeList);
-  if (NODE === '' || typeof window === 'undefined' || typeof window.SSS === 'undefined') return undefined;
+  if (NODE === '' || typeof(window) === 'undefined' || typeof(window?.SSS) === 'undefined') return undefined;
   const repo = new RepositoryFactoryHttp(NODE, {
     websocketUrl: NODE.replace('http', 'ws') + '/ws',
     websocketInjected: WebSocket,
