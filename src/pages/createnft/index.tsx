@@ -8,6 +8,11 @@ import {createNFTTransaction} from '@/utils/createNFTTransaction';
 import {sendTransactionWithSSS} from '@/utils/sendTransactionWithSSS';
 import { AggregateTransaction, MosaicId, Transaction, TransactionStatus } from 'symbol-sdk';
 
+//SSS用設定
+interface SSSWindow extends Window {
+  SSS: any
+}
+
 function CreateNFT(): JSX.Element {
   //共通設定
   const [progress, setProgress] = useState<boolean>(false); //ローディングの設定
@@ -30,8 +35,8 @@ function CreateNFT(): JSX.Element {
   const handleAgreeClickGetAddress = async () => {
     try {
         setProgress(true);
-        const transaction: {transaction:Transaction, mosaicId:MosaicId} | undefined = await createNFTTransaction(name, imageUrl, description);
-        if (typeof(transaction) === 'undefined') throw new Error('ノードに接続できません');
+        const clientPublickey = window.SSS.activePublicKey;
+        const transaction: {transaction:Transaction, mosaicId:MosaicId} = createNFTTransaction(name, imageUrl, description, clientPublickey);
         setMosaicId(transaction.mosaicId.toHex())
         const transactionStatus: TransactionStatus | undefined = await sendTransactionWithSSS(transaction.transaction);
         if (transactionStatus === undefined) {

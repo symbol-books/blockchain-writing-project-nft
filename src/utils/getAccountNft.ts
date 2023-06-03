@@ -1,35 +1,14 @@
 import {
-    Account,
     Address,
-    Deadline,
     KeyGenerator,
-    Metadata,
-    MosaicInfo,
-    PlainMessage,
     RepositoryFactoryHttp,
-    SignedTransaction,
-    TransactionHttp,
-    TransactionStatus,
-    TransferTransaction,
   } from 'symbol-sdk';
-  import { firstValueFrom } from 'rxjs';
-  import { connectNode } from '@/utils/connectNode';
-  import { nodeList } from '@/consts/nodeList';
-  import axios from 'axios';
+import { firstValueFrom } from 'rxjs';
+import { connectNode } from '@/utils/connectNode';
+import { nodeList } from '@/consts/nodeList';
 
-  import {getMosaicInfo} from '@/utils/getMosaicInfo';
+import {getMosaicInfo} from '@/utils/getMosaicInfo';
   
-  //SSS用設定
-  interface SSSWindow extends Window {
-    SSS: any
-  }
-  declare const window: SSSWindow
-
-  interface NftInfo {
-    mosaicInfo:MosaicInfo,
-    metadata:Metadata[]
-  }
-
 interface NFT {
     mosaicId:string,
     name: string,
@@ -46,18 +25,12 @@ interface NFT {
       websocketUrl: NODE.replace('http', 'ws') + '/ws',
       websocketInjected: WebSocket,
     });
-    const txRepo = repo.createTransactionRepository();
-    const tsRepo = repo.createTransactionStatusRepository();
     const acRepo = repo.createAccountRepository();
-    const listener = repo.createListener();
 
     const nameKey = KeyGenerator.generateUInt64Key('NAME').toHex()
     const imageUrlKey = KeyGenerator.generateUInt64Key('IMAGE').toHex()
     const descriptionKey = KeyGenerator.generateUInt64Key('DESCRIPTION').toHex()
   
-    const epochAdjustment = await firstValueFrom(repo.getEpochAdjustment());
-    const generationHash = await firstValueFrom(repo.getGenerationHash());
-    const networkType = await firstValueFrom(repo.getNetworkType());
     const clientAddress = Address.createFromRawAddress(address);
     const accountInfo = await firstValueFrom(acRepo.getAccountInfo(clientAddress));
     const accountMosaics = accountInfo.mosaics;

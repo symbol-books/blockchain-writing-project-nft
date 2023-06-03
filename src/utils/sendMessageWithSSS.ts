@@ -1,11 +1,9 @@
 import {
-  Account,
   Address,
   Deadline,
   PlainMessage,
   RepositoryFactoryHttp,
   SignedTransaction,
-  TransactionHttp,
   TransactionStatus,
   TransferTransaction,
 } from 'symbol-sdk';

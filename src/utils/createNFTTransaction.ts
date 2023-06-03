@@ -15,34 +15,21 @@ import {
   Convert,
   Transaction,
   MetadataTransactionService,
+  NetworkType,
 } from 'symbol-sdk';
-import { firstValueFrom } from 'rxjs';
 import { connectNode } from '@/utils/connectNode';
 import { nodeList } from '@/consts/nodeList';
+import { epochAdjustment, networkType } from '@/consts/blockchainProperty';
 
-//SSS用設定
-interface SSSWindow extends Window {
-  SSS: any
-}
-
-export const createNFTTransaction = async (
+export const createNFTTransaction = (
   name: string,
   imageUrl: string,
   description: string,
-): Promise<{transaction:Transaction, mosaicId:MosaicId} | undefined> => {
-  // ): Promise<TransactionStatus | undefined> => {
-  const NODE = await connectNode(nodeList);
-  if (NODE === '') return undefined;
-  const repo = new RepositoryFactoryHttp(NODE, {
-    websocketUrl: NODE.replace('http', 'ws') + '/ws',
-    websocketInjected: WebSocket,
-  });
-  const metaRepo = repo.createMetadataRepository();
-  const metaTransactionService = new MetadataTransactionService(metaRepo);
-  const epochAdjustment = await firstValueFrom(repo.getEpochAdjustment());
-  const networkType = await firstValueFrom(repo.getNetworkType());
+  clientPublicKey: string
+): {transaction:Transaction, mosaicId:MosaicId} => {
+
   const nonce = MosaicNonce.createRandom();
-  const clientPublicAccount = PublicAccount.createFromPublicKey(window.SSS.activePublicKey, networkType);
+  const clientPublicAccount = PublicAccount.createFromPublicKey(clientPublicKey, networkType);
   const mosaicId = MosaicId.createFromNonce(nonce, clientPublicAccount.address); 
   const mosaicDefinitionTransaction = MosaicDefinitionTransaction.create(
     Deadline.create(epochAdjustment),
@@ -61,16 +48,6 @@ export const createNFTTransaction = async (
     UInt64.fromUint(1),
     networkType,
   );
-  // const nameMetadataTransaction = metaTransactionService.createMosaicMetadataTransaction(
-  //   Deadline.create(epochAdjustment),
-  //   networkType,
-  //   clientPublicAccount.address,
-  //   mosaicId,
-  //   KeyGenerator.generateUInt64Key('NAME'),
-  //   name,
-  //   clientPublicAccount.address,
-  //   UInt64.fromUint(1)
-  //   )
   const nameMetadataTransaction = MosaicMetadataTransaction.create(
     Deadline.create(epochAdjustment),
     clientPublicAccount.address,

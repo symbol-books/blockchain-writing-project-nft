@@ -4,10 +4,10 @@ import {
     MosaicInfo,
     RepositoryFactoryHttp,
   } from 'symbol-sdk';
-  import { firstValueFrom } from 'rxjs';
-  import { connectNode } from '@/utils/connectNode';
-  import { nodeList } from '@/consts/nodeList';
-  
+import { firstValueFrom } from 'rxjs';
+import { connectNode } from '@/utils/connectNode';
+import { nodeList } from '@/consts/nodeList';
+
   export const getMosaicInfo = async (
     id: string,
   ): Promise<{mosaicInfo:MosaicInfo, metadata:Metadata[]} | undefined> => {
