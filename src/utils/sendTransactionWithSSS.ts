@@ -1,4 +1,5 @@
 import {
+  PublicAccount,
     RepositoryFactoryHttp,
     SignedTransaction,
     Transaction,
@@ -13,6 +14,7 @@ import {
   import { 
     nodeList
   } from '@/consts/nodeList';
+import { networkType } from '@/consts/blockchainProperty';
   
   //SSS用設定
   interface SSSWindow extends Window {
@@ -38,7 +40,7 @@ import {
     const signedTx:SignedTransaction = await new Promise((resolve) => {
       resolve(window.SSS.requestSign());
     })
-    const signerPublicAccount = tx.signer;
+    const signerPublicAccount = PublicAccount.createFromPublicKey(signedTx.signerPublicKey, networkType);
     if(typeof(signerPublicAccount)==="undefined")throw new Error("Transaction Singer is undefined");
     await firstValueFrom(txRepo.announce(signedTx));
     await listener.open();
